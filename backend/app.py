@@ -6,9 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 import secrets
+import hmac
+import hashlib
 from dotenv import load_dotenv
 import requests
-import razorpay
 
 load_dotenv()
 
@@ -16,14 +17,14 @@ app = Flask(__name__)
 CORS(app)
 
 # Razorpay setup — RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set as
-# environment variables in Railway. If they're missing, payment routes
-# return a clear error instead of crashing the whole server.
+# environment variables in Railway. We talk to Razorpay's REST API directly
+# over plain HTTP (via the `requests` library) instead of using their
+# official Python SDK — the SDK pulls in a dependency ('pkg_resources')
+# that isn't reliably available in this environment, causing silent
+# server crashes. Calling the REST API directly avoids that entirely.
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
-razorpay_client = (
-    razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-    if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET else None
-)
+RAZORPAY_API_BASE = 'https://api.razorpay.com/v1'
 
 # Database Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -392,7 +393,7 @@ def validate_coupon():
 @app.route('/api/payment/create-order', methods=['POST'])
 def create_payment_order():
     try:
-        if not razorpay_client:
+        if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
             return jsonify({'success': False, 'error': 'Payment gateway is not configured on the server yet'}), 500
 
         data = request.json
@@ -401,11 +402,19 @@ def create_payment_order():
             return jsonify({'success': False, 'error': 'Amount is required'}), 400
 
         amount_paise = int(round(float(amount) * 100))  # Razorpay expects paise, not rupees
-        razorpay_order = razorpay_client.order.create({
-            'amount': amount_paise,
-            'currency': 'INR',
-            'payment_capture': 1,
-        })
+
+        response = requests.post(
+            f'{RAZORPAY_API_BASE}/orders',
+            auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET),
+            json={
+                'amount': amount_paise,
+                'currency': 'INR',
+                'payment_capture': 1,
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        razorpay_order = response.json()
 
         return jsonify({
             'success': True,
@@ -413,25 +422,35 @@ def create_payment_order():
             'amount': amount_paise,
             'key_id': RAZORPAY_KEY_ID,
         }), 200
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'error': f'Could not reach payment gateway: {str(e)}'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/payment/verify', methods=['POST'])
 def verify_payment():
     try:
-        if not razorpay_client:
+        if not RAZORPAY_KEY_SECRET:
             return jsonify({'success': False, 'error': 'Payment gateway is not configured on the server yet'}), 500
 
         data = request.json
-        params = {
-            'razorpay_order_id': data.get('razorpay_order_id'),
-            'razorpay_payment_id': data.get('razorpay_payment_id'),
-            'razorpay_signature': data.get('razorpay_signature'),
-        }
-        razorpay_client.utility.verify_payment_signature(params)
+        order_id = data.get('razorpay_order_id', '')
+        payment_id = data.get('razorpay_payment_id', '')
+        signature = data.get('razorpay_signature', '')
+
+        # Razorpay's official verification method: HMAC-SHA256 of
+        # "order_id|payment_id" using your secret key, compared to the
+        # signature they sent back. This is the same check their own SDK
+        # does internally — just done directly, with no extra dependency.
+        message = f'{order_id}|{payment_id}'.encode()
+        expected_signature = hmac.new(
+            RAZORPAY_KEY_SECRET.encode(), message, hashlib.sha256
+        ).hexdigest()
+
+        if not hmac.compare_digest(expected_signature, signature):
+            return jsonify({'success': False, 'error': 'Payment verification failed — this payment could not be confirmed as genuine'}), 400
+
         return jsonify({'success': True}), 200
-    except razorpay.errors.SignatureVerificationError:
-        return jsonify({'success': False, 'error': 'Payment verification failed — this payment could not be confirmed as genuine'}), 400
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
