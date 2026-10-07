@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babu's Food - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            color: #ff6b35;
+            border-bottom-color: #ff6b35;
+        }
+        
+        .tab-button:hover {
+            color: #ff6b35;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+        
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .button-primary {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #e5591f;
+        }
+        
+        .button-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .button-secondary:hover {
+            background: #ddd;
+        }
+        
+        .button-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .button-danger:hover {
+            background: #c82333;
+        }
+        
+        .button-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .button-success:hover {
+            background: #218838;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-buttons button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+        
+        .stat-box .label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+        }
+        
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .modal-close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍛 Babu's Food Admin</h1>
+            <p>Manage your products and orders</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('products')">Products</button>
+            <button class="tab-button" onclick="switchTab('orders')">Orders</button>
+            <button class="tab-button" onclick="switchTab('coupons')">Coupons</button>
+            <button class="tab-button" onclick="switchTab('analytics')">Analytics</button>
+        </div>
+        
+        <!-- PRODUCTS TAB -->
+        <div id="products" class="tab-content active">
+            <div id="productsAlert" class="alert"></div>
+            
+            <div class="card">
+                <h2>Add New Product</h2>
+                <form id="productForm" onsubmit="addProduct(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Name *</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (₹) *</label>
+                            <input type="number" id="productPrice" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="productDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="text" id="productImage" placeholder="https://... (paste a food photo link)">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="productCategory" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="veg">Veg</option>
+                            <option value="non-veg">Non-Veg</option>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="drinks">Drinks</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="button button-primary">Add Product</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2>All Products</h2>
+                <div class="form-row" style="margin-bottom: 16px;">
+                    <div class="form-group">
+                        <label>Search by name</label>
+                        <input type="text" id="productSearch" placeholder="Type to search..." oninput="renderProductsTable()">
+                    </div>
+                    <div class="form-group">
+                        <label>Filter by category</label>
+                        <select id="productCategoryFilter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" onchange="renderProductsTable()">
+                            <option value="">All categories</option>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="veg">Veg</option>
+                            <option value="non-veg">Non-Veg</option>
+                            <option value="drinks">Drinks</option>
+                        </select>
+                    </div>
+                </div>
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsBody">
+                        <tr><td colspan="5" style="text-align: center; padding: 20px;">Loading products...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ORDERS TAB -->
+        <div id="orders" class="tab-content">
+            <div id="ordersAlert" class="alert"></div>
+            
+            <div class="card">
+                <h2>All Orders</h2>
+                <div class="form-group" style="margin-bottom: 16px; max-width: 320px;">
+                    <label>Search by customer name, phone, or order ID</label>
+                    <input type="text" id="orderSearch" placeholder="Type to search..." oninput="renderOrdersTable()">
+                </div>
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody">
+                        <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- COUPONS TAB -->
+        <div id="coupons" class="tab-content">
+            <div id="couponsAlert" class="alert"></div>
+
+            <div class="card">
+                <h2>Create New Coupon</h2>
+                <form id="couponForm" onsubmit="addCoupon(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Coupon Code</label>
+                            <input type="text" id="couponCode" placeholder="e.g. BABU20" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Discount (%)</label>
+                            <input type="number" id="couponDiscount" min="1" max="100" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="button button-primary">Create Coupon</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>All Coupons</h2>
+                <table id="couponsTable">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Discount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="couponsBody">
+                        <tr><td colspan="3" style="text-align: center; padding: 20px;">Loading coupons...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="analytics" class="tab-content">
+            <div class="stats" id="statsContainer">
+                <div class="stat-box">
+                    <div class="number" id="totalOrders">0</div>
+                    <div class="label">Total Orders</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="totalRevenue">₹0</div>
+                    <div class="label">Total Revenue</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="totalProducts">0</div>
+                    <div class="label">Active Products</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="pendingOrders">0</div>
+                    <div class="label">Pending Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeEditModal()">&times;</span>
+                <h2>Edit Product</h2>
+            </div>
+            <div id="editProductAlert" class="alert"></div>
+            <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" id="editName">
+            </div>
+            <div class="form-group">
+                <label>Price (₹)</label>
+                <input type="number" id="editPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="editDescription"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" id="editImage" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="editCategory" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="veg">Veg</option>
+                    <option value="non-veg">Non-Veg</option>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="drinks">Drinks</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="editAvailable" style="width: auto; margin-right: 8px;">
+                    Available today (uncheck if out of stock)
+                </label>
+            </div>
+            <button onclick="saveProductEdit()" class="button button-primary" style="width: 100%;">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeOrderModal()">&times;</span>
+                <h2>Order Details</h2>
+            </div>
+            <div id="orderDetails"></div>
+            <div style="margin-top: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 500;">Order Status:</label>
+                <select id="statusSelect" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+                <button onclick="updateOrderStatus()" class="button button-primary" style="width: 100%;">Update Status</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'https://babus-food-app-production.up.railway.app/api';
+        let allProducts = [];
+        let allOrders = [];
+        let selectedOrderId = null;
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load data
+            if (tabName === 'products') {
+                loadProducts();
+            } else if (tabName === 'orders') {
+                loadOrders();
+            } else if (tabName === 'coupons') {
+                loadCoupons();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
+            }
+        }
+        
+        // Load products (admin endpoint — includes sold-out items too)
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/admin/products`);
+                const data = await response.json();
+                allProducts = data.products || [];
+                renderProductsTable();
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showAlert('productsAlert', 'Error loading products', 'error');
+            }
+        }
+
+        // Renders the products table from allProducts, applying the
+        // current search text and category filter (no re-fetch needed)
+        function renderProductsTable() {
+            const searchTerm = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+            const categoryFilter = document.getElementById('productCategoryFilter')?.value || '';
+
+            const filtered = allProducts.filter(product => {
+                const matchesSearch = !searchTerm || product.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || (product.category || 'veg') === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            const tbody = document.getElementById('productsBody');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">No products match your search/filter</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(product => `
+                <tr>
+                    <td>${product.image_url ? `<img src="${product.image_url}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">` : '🍽️'}</td>
+                    <td>${product.name}</td>
+                    <td>${product.category || 'veg'}</td>
+                    <td>₹${product.price}</td>
+                    <td>${product.description || '-'}</td>
+                    <td>
+                        <label style="display: inline-flex; align-items: center; cursor: pointer; gap: 8px;">
+                            <input type="checkbox" ${product.is_available ? 'checked' : ''} onchange="toggleAvailability(${product.id}, this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span class="badge ${product.is_available ? 'badge-confirmed' : 'badge-pending'}">${product.is_available ? 'Available' : 'Sold Out'}</span>
+                        </label>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editProduct(${product.id})" class="button button-secondary">Edit</button>
+                            <button onclick="deleteProduct(${product.id})" class="button button-danger">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Add product
+        async function addProduct(e) {
+            e.preventDefault();
+            
+            const product = {
+                name: document.getElementById('productName').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                description: document.getElementById('productDescription').value,
+                image_url: document.getElementById('productImage').value,
+                category: document.getElementById('productCategory').value,
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(product)
+                });
+                
+                if (response.ok) {
+                    showAlert('productsAlert', 'Product added successfully!', 'success');
+                    document.getElementById('productForm').reset();
+                    loadProducts();
+                } else {
+                    showAlert('productsAlert', 'Error adding product', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('productsAlert', 'Error adding product', 'error');
+            }
+        }
+        
+        // Quick one-click availability toggle (no need to open the edit popup)
+        async function toggleAvailability(productId, isAvailable) {
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ is_available: isAvailable })
+                });
+
+                if (response.ok) {
+                    showAlert('productsAlert', isAvailable ? 'Marked as available' : 'Marked as sold out', 'success');
+                    loadProducts();
+                } else {
+                    showAlert('productsAlert', 'Error updating availability', 'error');
+                    loadProducts(); // revert the checkbox visually
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('productsAlert', 'Error updating availability', 'error');
+                loadProducts();
+            }
+        }
+
+        // Edit product
+        let editingProductId = null;
+
+        function editProduct(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            editingProductId = productId;
+            document.getElementById('editName').value = product.name;
+            document.getElementById('editPrice').value = product.price;
+            document.getElementById('editDescription').value = product.description || '';
+            document.getElementById('editImage').value = product.image_url || '';
+            document.getElementById('editCategory').value = product.category || 'veg';
+            document.getElementById('editAvailable').checked = product.is_available;
+            document.getElementById('editProductModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProductModal').classList.remove('active');
+        }
+
+        async function saveProductEdit() {
+            const updatedProduct = {
+                name: document.getElementById('editName').value,
+                price: parseFloat(document.getElementById('editPrice').value),
+                description: document.getElementById('editDescription').value,
+                image_url: document.getElementById('editImage').value,
+                category: document.getElementById('editCategory').value,
+                is_available: document.getElementById('editAvailable').checked,
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/products/${editingProductId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(updatedProduct)
+                });
+
+                if (response.ok) {
+                    closeEditModal();
+                    showAlert('productsAlert', 'Product updated successfully!', 'success');
+                    loadProducts();
+                } else {
+                    showAlert('editProductAlert', 'Error updating product', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('editProductAlert', 'Error updating product', 'error');
+            }
+        }
+
+        // Delete product
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('productsAlert', 'Product deleted successfully!', 'success');
+                    loadProducts();
+                } else {
+                    showAlert('productsAlert', 'Error deleting product', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('productsAlert', 'Error deleting product', 'error');
+            }
+        }
+        
+        // Load orders
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders`);
+                const data = await response.json();
+                allOrders = data.orders || [];
+                renderOrdersTable();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                showAlert('ordersAlert', 'Error loading orders', 'error');
+            }
+        }
+
+        // Renders the orders table from allOrders, applying the current search
+        function renderOrdersTable() {
+            const searchTerm = (document.getElementById('orderSearch')?.value || '').toLowerCase().trim();
+
+            const filtered = allOrders.filter(order => {
+                if (!searchTerm) return true;
+                return (
+                    order.customer_name.toLowerCase().includes(searchTerm) ||
+                    order.customer_phone.toLowerCase().includes(searchTerm) ||
+                    String(order.id).includes(searchTerm)
+                );
+            });
+
+            const tbody = document.getElementById('ordersBody');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #999;">No orders match your search</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(order => `
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>${order.customer_name}</td>
+                    <td>${order.customer_phone}</td>
+                    <td>₹${order.total_amount}</td>
+                    <td><span class="badge badge-${order.status}">${order.status}</span></td>
+                    <td>${order.payment_status}</td>
+                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="openOrderModal(${order.id})" class="button button-primary" style="font-size: 12px;">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Open order modal
+        function openOrderModal(orderId) {
+            selectedOrderId = orderId;
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            let itemsHtml = '<em>Could not read items</em>';
+            try {
+                // Handles both proper JSON (new orders) and old Python-style
+                // dict text (legacy orders, e.g. True/False/None, single quotes)
+                const normalized = order.items
+                    .replace(/'/g, '"')
+                    .replace(/\bTrue\b/g, 'true')
+                    .replace(/\bFalse\b/g, 'false')
+                    .replace(/\bNone\b/g, 'null');
+                const items = JSON.parse(normalized);
+                itemsHtml = '<ul style="margin: 4px 0; padding-left: 20px;">' +
+                    items.map(it => `<li>${it.name} × ${it.quantity} — ₹${it.price * it.quantity}</li>`).join('') +
+                    '</ul>';
+            } catch (e) {
+                itemsHtml = `<pre style="white-space: pre-wrap; font-size: 12px;">${order.items}</pre>`;
+            }
+
+            const addressHtml = order.house_details || order.area_details
+                ? `${order.house_details || ''}${order.house_details && order.area_details ? ', ' : ''}${order.area_details || ''}`
+                : order.customer_address;
+
+            const details = `
+                <p><strong>Customer:</strong> ${order.customer_name}</p>
+                <p><strong>Phone:</strong> ${order.customer_phone}</p>
+                <p><strong>Address:</strong> ${addressHtml}</p>
+                ${order.latitude ? `<p><strong>GPS:</strong> <a href="https://maps.google.com/?q=${order.latitude},${order.longitude}" target="_blank">View on map</a></p>` : ''}
+                ${order.coupon_code ? `<p><strong>Coupon Used:</strong> ${order.coupon_code} (−₹${order.discount_amount})</p>` : ''}
+                <p><strong>Total:</strong> ₹${order.total_amount}</p>
+                <p><strong>Payment Status:</strong> ${order.payment_status}</p>
+                <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                <p><strong>Items:</strong></p>
+                ${itemsHtml}
+            `;
+            
+            document.getElementById('orderDetails').innerHTML = details;
+            document.getElementById('statusSelect').value = order.status;
+            document.getElementById('orderModal').classList.add('active');
+        }
+        
+        function closeOrderModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+        
+        // Update order status
+        async function updateOrderStatus() {
+            const status = document.getElementById('statusSelect').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/orders/${selectedOrderId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({status})
+                });
+                
+                if (response.ok) {
+                    showAlert('ordersAlert', 'Order updated successfully!', 'success');
+                    closeOrderModal();
+                    loadOrders();
+                } else {
+                    showAlert('ordersAlert', 'Error updating order', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('ordersAlert', 'Error updating order', 'error');
+            }
+        }
+        
+        // Load coupons
+        async function loadCoupons() {
+            try {
+                const response = await fetch(`${API_URL}/coupons`);
+                const data = await response.json();
+                const coupons = data.coupons || [];
+
+                const tbody = document.getElementById('couponsBody');
+                tbody.innerHTML = coupons.length === 0
+                    ? '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No coupons yet</td></tr>'
+                    : coupons.map(c => `
+                        <tr>
+                            <td><strong>${c.code}</strong></td>
+                            <td>${c.discount_percent}% off</td>
+                            <td><button onclick="deleteCoupon(${c.id})" class="button button-danger">Remove</button></td>
+                        </tr>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading coupons:', error);
+            }
+        }
+
+        // Add coupon
+        async function addCoupon(e) {
+            e.preventDefault();
+            const coupon = {
+                code: document.getElementById('couponCode').value,
+                discount_percent: parseFloat(document.getElementById('couponDiscount').value),
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/coupons`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(coupon)
+                });
+
+                if (response.ok) {
+                    showAlert('couponsAlert', 'Coupon created!', 'success');
+                    document.getElementById('couponForm').reset();
+                    loadCoupons();
+                } else {
+                    const err = await response.json();
+                    showAlert('couponsAlert', err.error || 'Error creating coupon', 'error');
+                }
+            } catch (error) {
+                showAlert('couponsAlert', 'Error creating coupon', 'error');
+            }
+        }
+
+        // Remove coupon
+        async function deleteCoupon(couponId) {
+            if (!confirm('Remove this coupon?')) return;
+            try {
+                const response = await fetch(`${API_URL}/coupons/${couponId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('couponsAlert', 'Coupon removed', 'success');
+                    loadCoupons();
+                }
+            } catch (error) {
+                showAlert('couponsAlert', 'Error removing coupon', 'error');
+            }
+        }
+
+        // Load analytics
+        function loadAnalytics() {
+            const totalOrders = allOrders.length;
+            const totalRevenue = allOrders.reduce((sum, o) => sum + o.total_amount, 0);
+            const pendingOrders = allOrders.filter(o => o.status === 'pending').length;
+            
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalRevenue').textContent = '₹' + totalRevenue;
+            document.getElementById('totalProducts').textContent = allProducts.length;
+            document.getElementById('pendingOrders').textContent = pendingOrders;
+        }
+        
+        // Show alert
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 3000);
+        }
+        
+        // Initial load
+        loadProducts();
+    </script>
+</body>
+</html>
